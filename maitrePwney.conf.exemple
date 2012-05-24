@@ -1,0 +1,7 @@
+[config]
+name = botname
+password = *****
+adress = irc.exemple.net
+port = 6666
+channel = #testChannel
+usersAllowed = user1, user2, user3
