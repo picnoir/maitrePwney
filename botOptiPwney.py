@@ -56,6 +56,31 @@ class BotPoney(ircbot.SingleServerIRCBot):
         request = irclib.nm_to_n(ev.source())
         if ev.arguments()[0]=="dessine-moi un poney" and request in self.usersAllowed:
             self.draw_poney(serv)
+        if ev.arguments()[0].split(' ')[0] == '!add':
+            self.add_bookmark(serv, ev.arguments()[0].strip().split(' '))
+
+
+    def add_bookmark(self, serv,  bookmarkWords):
+        bookmarkWords.remove("!add")
+        if bookmarkWords[0].find('http',0,5)==0:
+            bookmarkFormat = ConfigParser.RawConfigParser()
+            bookmarkFormat.read('bookmarks')
+            try: bookmarkFormat.get(bookmarkWords[0],'tag1')
+            except ConfigParser.NoSectionError:
+                bookmarkFormat.add_section(bookmarkWords[1])
+                category=bookmarkWords[1]
+                bookmarkWords.remove(bookmarkWords[1])
+                number = 1
+                for tag in bookmarkWords:
+                    bookmarkFormat.set(category,"tag{0}".format(number),tag)
+                    number += 1
+                with open('bookmarks', 'wb') as bookmarkFile:
+                    bookmarkFormat.write(bookmarkFile)
+                serv.privmsg(self.channel, "Bookmark enregistré.")
+            else:
+                serv.privmsg(self.channel, "Url déjà bookmarkée.")
+        else:
+            serv.privmsg(self.channel, "Veuillez bien respecter la syntaxe suivante: !add <url> <tag1> <tag2> <tag3> ...")
             
 
 
