@@ -23,7 +23,7 @@ except:
 
 
 class BotPoney(ircbot.SingleServerIRCBot):
-    """Simple irc bot. Can set op mode to someone"""
+    """Irc bot. Can set op mode to someone, draw a poney and save bookmarks"""
 
 
     def __init__(self):
@@ -58,6 +58,8 @@ class BotPoney(ircbot.SingleServerIRCBot):
             self.draw_poney(serv)
         if ev.arguments()[0].split(' ')[0] == '!add':
             self.add_bookmark(serv, ev.arguments()[0].strip().split(' '))
+        if ev.arguments()[0].split(' ')[0]== '!search':
+            self.search_bookmark(serv, ev.arguments()[0].split(' ')[1])
 
 
     def add_bookmark(self, serv,  bookmarkWords):
@@ -67,9 +69,9 @@ class BotPoney(ircbot.SingleServerIRCBot):
             bookmarkFormat.read('bookmarks')
             try: bookmarkFormat.get(bookmarkWords[0],'tag1')
             except ConfigParser.NoSectionError:
-                bookmarkFormat.add_section(bookmarkWords[1])
-                category=bookmarkWords[1]
-                bookmarkWords.remove(bookmarkWords[1])
+                bookmarkFormat.add_section(bookmarkWords[0])
+                category=bookmarkWords[0]
+                bookmarkWords.remove(bookmarkWords[0])
                 number = 1
                 for tag in bookmarkWords:
                     bookmarkFormat.set(category,"tag{0}".format(number),tag)
@@ -81,7 +83,19 @@ class BotPoney(ircbot.SingleServerIRCBot):
                 serv.privmsg(self.channel, "Url déjà bookmarkée.")
         else:
             serv.privmsg(self.channel, "Veuillez bien respecter la syntaxe suivante: !add <url> <tag1> <tag2> <tag3> ...")
-            
+
+
+    def search_bookmark(self, serv, tag):
+        bookmarks= ConfigParser.RawConfigParser()
+        bookmarks.read('bookmarks')
+        done = False
+        for section in bookmarks.sections():
+            for option in bookmarks.options(section):
+                if bookmarks.get(section,option)==tag:
+                    serv.privmsg(self.channel, "{0}".format(section))
+                    done = True
+        if done==False:
+            serv.privmsg(self.channel, "Aucun bookmark n'a été taggé avec {0}".format(tag))
 
 
     def draw_poney(self, serv):
